@@ -22,7 +22,7 @@ rsync \
 Simply replace the `rsync` executable for this script:
 
 ```bash
-./rsync_parallel \
+./prsync \
   --times --recursive --progress \
   --exclude "raw_reads" --exclude ".snakemake" \
   user@example.com:/my_remote_dir/ /my_local_dir/
@@ -34,7 +34,7 @@ By default, the script will use `10` parallel jobs for transfering files.
 This can be modified using `--parallel` as the first command line argument to the script:
 
 ```bash
-./rsync_parallel \
+./prsync \
   --parallel=20 \
   --times --recursive --progress \
   --exclude "raw_reads" --exclude ".snakemake" \
