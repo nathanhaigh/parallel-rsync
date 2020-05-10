@@ -27,7 +27,7 @@ if [[ "$1" == --parallel=* ]]; then
 	PARALLEL="${1##*=}"
 	shift
 else
-	PARALLEL=$(nprocs &>/dev/null || echo 10)
+	PARALLEL=$(nproc &>/dev/null || echo 10)
 fi
 echo -e "${GREEN}INFO: Using up to ${PARALLEL} processes for transfer ...${NC}"
 
