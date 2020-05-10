@@ -43,7 +43,7 @@ rsync $@ --out-format="%l %n" --no-v --dry-run \
 # check for nothing-to-do
 TOTAL_FILES=$(cat ${TMPDIR}/files.all | wc -l)
 TOTAL_SIZE=$(awk '{ts+=$1}END{print ts}' < ${TMPDIR}/files.all)
-echo -e "${GREEN}INFO: ${TOTAL_FILES} ($(( TOTAL_SIZE/1024**3 )) GB) files to transfer.${NC}"
+echo -e "${GREEN}INFO: ${TOTAL_FILES} ($(( TOTAL_SIZE/1024**2 )) MB) files to transfer.${NC}"
 if [ "${TOTAL_FILES}" -eq "0" ]; then
 	echo -e "${ORANGE}WARN: Nothing to transfer :)${NC}"
 	exit 0
