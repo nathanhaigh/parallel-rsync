@@ -6,7 +6,7 @@ set -e
 #   rsync_parallel.sh [--parallel=N] [rsync args...]
 # 
 # Options:
-#   --parallel=N	Use N parallel processes for transfer. Defaults to 10.
+#   --parallel=N	Use N parallel processes for transfer. Defaults to `nproc` or 10.
 #
 # Notes:
 #   * Requires GNU Parallel
@@ -17,18 +17,24 @@ set -e
 #     might want to test weird options upfront.
 #
 
+# Define colours for STDERR text
+RED='\033[0;31m'
+ORANGE='\033[0;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
 if [[ "$1" == --parallel=* ]]; then
 	PARALLEL="${1##*=}"
 	shift
 else
-	PARALLEL=10
+	PARALLEL=$(nprocs &>/dev/null || echo 10)
 fi
-echo "Using up to ${PARALLEL} processes for transfer..."
+echo -e "${GREEN}INFO: Using up to ${PARALLEL} processes for transfer ...${NC}"
 
 TMPDIR=$(mktemp -d)
 trap "rm -rf ${TMPDIR}" EXIT
 
-echo "Figuring out file list..."
+echo -e "${GREEN}INFO: Determining file list for transfer ...${NC}"
 # sorted by size (descending)
 rsync $@ --out-format="%l %n" --no-v --dry-run \
   | sort --numeric-sort --reverse \
@@ -36,8 +42,10 @@ rsync $@ --out-format="%l %n" --no-v --dry-run \
 
 # check for nothing-to-do
 TOTAL_FILES=$(cat ${TMPDIR}/files.all | wc -l)
+TOTAL_SIZE=$(awk '{ts+=$1}END{print ts}' < ${TMPDIR}/files.all)
+echo -e "${GREEN}INFO: ${TOTAL_FILES} ($(( TOTAL_SIZE/1024**3 )) GB) files to transfer.${NC}"
 if [ "${TOTAL_FILES}" -eq "0" ]; then
-	echo "Nothing to transfer :)"
+	echo -e "${ORANGE}WARN: Nothing to transfer :)${NC}"
 	exit 0
 fi
 
@@ -59,7 +67,7 @@ function array_min {
   echo "${min_i}"
 }
 
-echo "Calculating chunks..."
+echo -e "${GREEN}INFO: Distributing files among chunks ...${NC}"
 # declare chunk-size array
 for ((I = 0 ; I < PARALLEL ; I++ )); do
 	CHUNKS["${I}"]=0 
@@ -77,12 +85,13 @@ while read FSIZE FPATH; do
   echo "${FPATH}" >> "${TMPDIR}/chunk.${MIN_I}"
 
   if ! ((PROGRESS % 5000)); then
-    >&2 echo "${SECONDS}s: ${PROGRESS} of ${TOTAL_FILES}"
+    >&2 echo -e "${GREEN}INFO: ${PROGRESS} of ${TOTAL_FILES} (${SECONDS}s)${NC}"
   fi
 done < "${TMPDIR}/files.all"
-echo "${SECONDS}s"
+echo -e "${GREEN}DONE (${SECONDS}s)${NC}"
 
-find "${TMPDIR}" -type f -name "chunk.*" -exec cat {} \;
+#find "${TMPDIR}" -type f -name "chunk.*" -exec cat {} \;
 
-echo "Starting transfers..."
+echo -e "${GREEN}INFO: Starting transfers ...${NC}"
 find "${TMPDIR}" -type f -name "chunk.*" | parallel -j ${PARALLEL} -t --verbose --progress rsync --files-from={} $@
+echo -e "${GREEN}DONE (${SECONDS}s)${NC}"
