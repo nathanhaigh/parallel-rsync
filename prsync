@@ -96,6 +96,12 @@ while read -r FSIZE FPATH; do
     >&2 echo -e "${GREEN}INFO: ${PROGRESS} of ${TOTAL_FILES} (${SECONDS}s)${NC}"
   fi
 done < "${TMPDIR}/files.all"
+# Reverse the list of files in every other chunk so some are sorted largest->smallest and others smallest->largest
+# This will aid transfer efficiency, so some "queues" are processing large files first, while others are processing small files first.
+for ((I = 1 ; I < PARALLEL ; I+=2 )); do
+	tac "${TMPDIR}/chunk.${MIN_I}" > "${TMPDIR}/chunk.${MIN_I}.r" && mv "${TMPDIR}/chunk.${MIN_I}.r" "${TMPDIR}/chunk.${MIN_I}"
+done
+
 echo -e "${GREEN}DONE (${SECONDS}s)${NC}"
 
 #find "${TMPDIR}" -type f -name "chunk.*" -exec cat {} \;
