@@ -42,7 +42,7 @@ trap "rm -rf ${TMPDIR}" EXIT
 
 echo -e "${GREEN}INFO: Determining file list for transfer ...${NC}"
 # sorted by size (descending)
-rsync $@ --out-format="%l %n" --no-v --dry-run \
+rsync $@ --out-format="%l %n" --no-v --dry-run 2> /dev/null \
   | sort --numeric-sort --reverse \
   > "${TMPDIR}/files.all"
 
