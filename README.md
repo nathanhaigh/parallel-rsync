@@ -30,7 +30,7 @@ Simply replace the `rsync` executable for this script:
 
 ## Number of Parallel Jobs
 
-By default, the script will use `10` parallel jobs for transfering files.
+By default, the script will use `10` or the core count of your CPU for the number of parallel jobs for transfering files, whichever is higher.
 This can be modified using `--parallel` as the first command line argument to the script:
 
 ```bash
