@@ -38,7 +38,7 @@ fi
 echo -e "${GREEN}INFO: Using up to ${PARALLEL} processes for transfer ...${NC}"
 
 TMPDIR=$(mktemp -d)
-trap "rm -rf ${TMPDIR}" EXIT
+trap 'rm -rf "${TMPDIR}"' EXIT
 
 echo -e "${GREEN}INFO: Determining file list for transfer ...${NC}"
 # sorted by size (descending)
