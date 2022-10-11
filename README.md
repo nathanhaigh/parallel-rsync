@@ -30,8 +30,9 @@ Simply replace the `rsync` executable for this script:
 
 ## Number of Parallel Jobs
 
-By default, the script will use `10` parallel jobs for transfering files.
-This can be modified using `--parallel` as the first command line argument to the script:
+By default, the script will use 1 parallel job for each processor on the machine.
+This is determined by `nproc` and if this fails, we fall back to `10` parallel jobs for transfering files.
+This behaviour can be overriden by using `--parallel` as the first command line argument to the script:
 
 ```bash
 ./prsync \
