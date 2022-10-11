@@ -6,7 +6,7 @@ set -e
 #   rsync_parallel.sh [--parallel=N] [rsync args...]
 # 
 # Options:
-#   --parallel=N	Use N parallel processes for transfer. Defaults to `nproc` or 10.
+#   --parallel=N	Use N parallel processes for transfer. Default is to use all available processors (`nproc`) or fail back to 10.
 #
 # Notes:
 #   * Requires GNU Parallel
@@ -33,7 +33,7 @@ if [[ "$1" == --parallel=* ]]; then
 	PARALLEL="${1##*=}"
 	shift
 else
-	PARALLEL=$(nproc || echo 10)
+	PARALLEL=$(nproc 2> /dev/null || echo 10)
 fi
 echo -e "${GREEN}INFO: Using up to ${PARALLEL} processes for transfer ...${NC}"
 
