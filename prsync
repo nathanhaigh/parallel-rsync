@@ -89,7 +89,7 @@ while read -r FSIZE FPATH; do
   array_min "${CHUNKS[@]}"
   #MIN_I=$(array_min ${CHUNKS[@]})
 
-  CHUNKS[${MIN_I}]=$(( ${CHUNKS[${MIN_I}]} + FSIZE ))
+  CHUNKS[MIN_I]=$(( CHUNKS[MIN_I] + FSIZE ))
   echo "${FPATH}" >> "${TMPDIR}/chunk.${MIN_I}"
 
   if ! ((PROGRESS % 25000)); then
