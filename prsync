@@ -42,7 +42,7 @@ trap 'rm -rf "${TMPDIR}"' EXIT
 
 echo -e "${GREEN}INFO: Determining file list for transfer ...${NC}"
 # sorted by size (descending)
-rsync $@ --out-format="%l %n" --no-v --dry-run 2> /dev/null \
+rsync "$@" --out-format="%l %n" --no-v --dry-run 2> /dev/null \
   | sort --numeric-sort --reverse \
   > "${TMPDIR}/files.all"
 
@@ -86,7 +86,7 @@ SECONDS=0
 while read -r FSIZE FPATH; do
   PROGRESS=$((PROGRESS+1))
 
-  array_min ${CHUNKS[@]}
+  array_min "${CHUNKS[@]}"
   #MIN_I=$(array_min ${CHUNKS[@]})
 
   CHUNKS[${MIN_I}]=$(( ${CHUNKS[${MIN_I}]} + FSIZE ))
@@ -107,5 +107,5 @@ echo -e "${GREEN}DONE (${SECONDS}s)${NC}"
 #find "${TMPDIR}" -type f -name "chunk.*" -exec cat {} \;
 
 echo -e "${GREEN}INFO: Starting transfers ...${NC}"
-find "${TMPDIR}" -type f -name "chunk.*" | parallel -j "${PARALLEL}" -t --verbose --progress rsync --files-from={} $@
+find "${TMPDIR}" -type f -name "chunk.*" | parallel -j "${PARALLEL}" -t --verbose --progress rsync --files-from={} "$@"
 echo -e "${GREEN}DONE (${SECONDS}s)${NC}"
