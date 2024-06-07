@@ -99,6 +99,11 @@ done < "${TMPDIR}/files.all"
 # Reverse the list of files in every other chunk so some are sorted largest->smallest and others smallest->largest
 # This will aid transfer efficiency, so some "queues" are processing large files first, while others are processing small files first.
 for ((I = 1 ; I < PARALLEL_RSYNC ; I+=2 )); do
+  # If the list of files to transfer is small, we may not have any files to work with
+  if [ ! -f "${TMPDIR}/chunk.${I}" ]; then
+    continue
+  fi
+  
 	tac "${TMPDIR}/chunk.${I}" > "${TMPDIR}/chunk.${I}.r" && mv "${TMPDIR}/chunk.${I}.r" "${TMPDIR}/chunk.${I}"
 done
 
