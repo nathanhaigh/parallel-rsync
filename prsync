@@ -25,15 +25,15 @@ NC='\033[0m' # No Color
 
 if ! command -v parallel &> /dev/null
 then
-    echo -e "${RED}parallel could not be found${NC}"
-    exit
+  echo -e "${RED}parallel could not be found${NC}"
+  exit
 fi
 
 if [[ "$1" == --parallel=* ]]; then
-	PARALLEL_RSYNC="${1##*=}"
-	shift
+  PARALLEL_RSYNC="${1##*=}"
+  shift
 else
-	PARALLEL_RSYNC=$(nproc 2> /dev/null || echo 10)
+  PARALLEL_RSYNC=$(nproc 2> /dev/null || echo 10)
 fi
 echo -e "${GREEN}INFO: Using up to ${PARALLEL_RSYNC} processes for transfer ...${NC}"
 
@@ -42,7 +42,8 @@ trap 'rm -rf "${TMPDIR}"' EXIT
 
 echo -e "${GREEN}INFO: Determining file list for transfer ...${NC}"
 # sorted by size (descending)
-rsync "$@" --out-format="%l %n" --no-v --quiet --dry-run 2> /dev/null \
+rsync "$@" --out-format="%l %n" --no-v --dry-run 2> /dev/null \
+  | grep -v "sending incremental file list" \
   | sort --numeric-sort --reverse \
   > "${TMPDIR}/files.all"
 
@@ -51,8 +52,8 @@ TOTAL_FILES=$(wc -l < "${TMPDIR}/files.all")
 TOTAL_SIZE=$(awk '{ts+=$1}END{printf "%.0f", ts}' < "${TMPDIR}/files.all")
 echo -e "${GREEN}INFO: ${TOTAL_FILES} ($(( TOTAL_SIZE/1024**2 )) MB) files to transfer.${NC}"
 if [ "${TOTAL_FILES}" -eq "0" ]; then
-	echo -e "${ORANGE}WARN: Nothing to transfer :)${NC}"
-	exit 0
+  echo -e "${ORANGE}WARN: Nothing to transfer :)${NC}"
+  exit 0
 fi
 
 function array_min {
@@ -77,7 +78,7 @@ function array_min {
 echo -e "${GREEN}INFO: Distributing files among chunks ...${NC}"
 # declare chunk-size array
 for ((I = 0 ; I < PARALLEL_RSYNC ; I++ )); do
-	CHUNKS["${I}"]=0 
+  CHUNKS["${I}"]=0 
 done
 
 # add each file to the emptiest chunk, so they're as balanced by size as possible
@@ -104,7 +105,7 @@ for ((I = 1 ; I < PARALLEL_RSYNC ; I+=2 )); do
     continue
   fi
   
-	tac "${TMPDIR}/chunk.${I}" > "${TMPDIR}/chunk.${I}.r" && mv "${TMPDIR}/chunk.${I}.r" "${TMPDIR}/chunk.${I}"
+  tac "${TMPDIR}/chunk.${I}" > "${TMPDIR}/chunk.${I}.r" && mv "${TMPDIR}/chunk.${I}.r" "${TMPDIR}/chunk.${I}"
 done
 
 echo -e "${GREEN}DONE (${SECONDS}s)${NC}"
