@@ -44,7 +44,7 @@ echo -e "${GREEN}INFO: Determining file list for transfer ...${NC}"
 # sorted by size (descending)
 rsync "$@" --out-format="%l %n" --no-v --dry-run 2> /dev/null \
   | grep -v "sending incremental file list" \
-  | sort --numeric-sort --reverse \
+  | sort -n -r \
   > "${TMPDIR}/files.all"
 
 # check for nothing-to-do
